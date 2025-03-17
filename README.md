@@ -10,7 +10,6 @@ a release, a schedule, or a manual trigger.
 The action is a composite action that uses several other actions to build and
 publish images. The action uses the following actions:
 
-- [
 - [docker/build-push-action](https://github.com/docker/build-push-action)
 - [docker/login-action](https://github.com/docker/login-action)
 - [docker/setup-qemu-action](https://github.com/docker/setup-qemu-action)
