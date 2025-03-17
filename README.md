@@ -11,6 +11,24 @@ various platforms, tags the image, and then publishes a Docker image to various
 registries. The action can be triggered by a push to a branch, a pull request,
 a release, a schedule, or a manual trigger.
 
+The action will add OCI metadata to the image, including the following:
+
+- title
+- description
+- url
+- source
+- version
+- created
+- revision
+- license
+
+The action will also update the description of the image on DockerHub, Quay,
+and Harbor using the README.md file in the repository.
+
+The action will also generate Software Bill of Materials (SBOM) files in
+CycloneDX format and use them to generate attestations for each image that
+is built.
+
 The action is a composite action that uses several other actions to build and
 publish images. The action uses the following actions:
 
@@ -20,6 +38,8 @@ publish images. The action uses the following actions:
 - [docker/setup-buildx-action](https://github.com/docker/setup-buildx-action)
 - [docker/metadata-action](https://github.com/docker/metadata-action)
 - [docker/build-push-action](https://github.com/docker/build-push-action)
+- [anchore/sbom-action](https://github.com/anchore/sbom-action)
+- [actions/attest-sbom](https://github.com/actions/attest-sbom)
 - [christian-korneck/update-container-description-action](https://github.com/christian-korneck/update-container-description-action)
 
 By default, the action builds images for the following platforms:
