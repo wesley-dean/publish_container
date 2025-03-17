@@ -1,54 +1,214 @@
-# template
+# Publish Image to Various Registries
 
 ## Description
 
-This is a template for a README.md file. It is a markdown file that is used to
-describe a project. It is used to provide information about the project to the
-users and contributors. It is a good practice to have a README.md file in your
-project repository.
+This project is a GitHub Action that builds a Docker-compatible image on
+various platforms, tags the image, and then publishes a Docker image to various
+registries. The action can be triggered by a push to a branch, a pull request,
+a release, a schedule, or a manual trigger.
+
+The action is a composite action that uses several other actions to build and
+publish images. The action uses the following actions:
+
+- [
+- [docker/build-push-action](https://github.com/docker/build-push-action)
+- [docker/login-action](https://github.com/docker/login-action)
+- [docker/setup-qemu-action](https://github.com/docker/setup-qemu-action)
+- [docker/setup-buildx-action](https://github.com/docker/setup-buildx-action)
+- [docker/metadata-action](https://github.com/docker/metadata-action)
+- [docker/build-push-action](https://github.com/docker/build-push-action)
+- [christian-korneck/update-container-description-action](https://github.com/christian-korneck/update-container-description-action)
+
+By default, the action builds images for the following platforms:
+
+- linux/amd64
+- linux/arm64
+- linux/arm/v6
+- linux/arm/v7
+
+The action can be configured to build images for other platforms by setting the
+`platforms` input.
+
+The action can be configured to publish images to the following registries:
+
+- DockerHub (docker.io)
+- GitHub Container Registry (ghcr.io)
+- Quay (quay.io)
+- Harbor (goharbor.io)
+- Amazon Elastic Container Registry (ECR)
+- custom registry
+
+The action can be configured to publish images to other registries by setting
+`_username` and `_token` inputs for the respective registries:
+
+- **DockerHub**: `dockerhub_username` and `dockerhub_token`
+- **GitHub Container Registry**: `ghcr_username` and `ghcr_token`
+- **Quay**: `quay_username` and `quay_token`
+- **Harbor**: `harbor_username` and `harbor_token`
+- **Amazon Elastic Container Registry (ECR)**: `ecr_access_key_id` and `ecr_secret_access_key`
+- **Custom Registry**: `custom_registry_username` and `custom_registry_token`
+
+The action adds various tags to the image, including the following:
+
+- every build
+  - `edge`
+  - `{short sha}`: (short SHA hash of the commit)
+  - `{long sha}` (long SHA hash of the commit)
+
+- when the action is triggered by a push to a branch
+- `latest`
+- `{major}.{minor}.{patch}`
+- `{major}.{minor}`
+- `{major}`
 
 ## Usage
 
-You can use this template to create a README.md file for your project. You can
+To use the action, add the following to your GitHub Actions workflow:
 
-- Clone this repository
-- Copy the README.md file to your project repository
-- Edit the file to add information about your project
+```yaml
+  - name: Publish Image to Various Registries
+    uses: wesdean/publish-image-to-various-registries@v1
+    with:
+      platforms: 'linux/amd64,linux/arm64,linux/arm/v6,linux/arm/v7'
+      dockerfile: 'Dockerfile'
+      context: '.'
 
-### Environment Variables
+      # to push to DockerHub, use:
+      dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+      dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
 
-There are three environment variables that need to be set for this project to
-work correctly:
+      # to push to GitHub Container Registry (GHCR), use:
+      ghcr_username: ${{ secrets.GHCR_USERNAME }}
 
-- `PAT` - Your GitHub Personal Access Token
-- `GPG_PRIVATE_KEY` - Your GPG Private Key
-- `GPG_PRIVATE_KEY_PASSPHRASE` - Your GPG Private Key Passphrase
+      # to push to Quay, use:
+      quay_username: ${{ secrets.QUAY_USERNAME }}
+      quay_token: ${{ secrets.QUAY_TOKEN }}
 
-The `PAT` environment variable is used by MegaLinter to authenticate with the
-GitHub API. The `GPG_PRIVATE_KEY` and `GPG_PRIVATE_KEY_PASSPHRASE` environment
-variables are used to sign the commits that MegaLinter creates when
-`APPLY_FIXES` is set to `true`.
+      # to push to Harbor, use:
+      harbor_username: ${{ secrets.HARBOR_USERNAME }}
+      harbor_token: ${{ secrets.HARBOR_TOKEN }}
 
-If the MegaLinter action is disabled, none of these environment variables are
-required.
+      # to push to Amazon Elastic Container Registry (ECR), use:
+      ecr_access_key_id: ${{ secrets.ECR_ACCESS_KEY_ID }}
+      ecr_secret_access_key: ${{ secrets.ECR_SECRET_ACCESS_KEY }}
+      ecr_region: 'us-east-1'
 
-### Conventional Commits
+      # to push to a custom registry, use:
+      custom_registry_username: ${{ secrets.CUSTOM_REGISTRY_USERNAME }}
+      custom_registry_token: ${{ secrets.CUSTOM_REGISTRY_TOKEN }}
+      custom_registry: 'registry.example.com'
+```
 
-This project uses Conventional Commits. Conventional Commits is a specification
-for adding human and machine readable meaning to commit messages. It is a
-lightweight convention on top of commit messages. The specification can be
-found at [conventionalcommits.org](https://www.conventionalcommits.org/).
+All of the inputs are optional.  That said, if none of the inputs are set, the
+action will build the image and tag it, but it will not publish the image.
+It'll just eat your billing minutes.  I recommend against that.
 
-Specifically, this project uses the
-[bitshifted/git-auto-semver](https://github.com/bitshifted/git-auto-semver)
-action to automatically increment the version number based on the commit
-messages:
+### Inputs
 
+The following inputs are available:
 
-- `build`, `chore`, `ci`, `docs`, `fix`, `perf`, `refactor`, `revert`,
-  `style`, `test`: bump micro (patch) number
-- `feat`: bump minor version number
-- `BREAKING CHANGE`: bump major version number
+- **basic**
+  - context: The build context for the Docker build. Default: `.`.
+  - dockerfile: The path to the Dockerfile. Default: `Dockerfile`.
+  - platforms: The platforms to build images for. Default: `linux/amd64,linux/arm64,linux/arm/v6,linux/arm/v7`.
+- **DockerHub**
+  - dockerhub_image: The name of the image on DockerHub. Default:
+    `{ dockerhub username }/{ repository name }`.
+  - dockerhub_username: The username for DockerHub.  Required to use DockerHub.
+  - dockerhub_token: The token for DockerHub.  Required to use DockerHub.
+  - dockerhub_registry: The URL for DockerHub. Default: `docker.io`.
+- **GitHub Container Registry (GHCR)**
+  - ghcr_image: The name of the image on GHCR. Default:
+    `{ ghcr username }/{ repository name }`.
+  - ghcr_username: The username for GHCR.  Required to use GHCR.
+  - ghcr_token: The token for GHCR.  Required to use GHCR.
+  - ghcr_registry: The URL for GHCR. Default: `ghcr.io`.
+- **Quay**
+  - quay_image: The name of the image on Quay. Default:
+    `{ quay username }/{ repository name }`.
+  - quay_username: The username for Quay.  Required to use Quay.
+  - quay_token: The token for Quay.  Required to use Quay.
+  - quay_registry: The URL for Quay. Default: `quay.io`.
+- **Harbor**
+  - harbor_image: The name of the image on Harbor. Default:
+    `{ harbor username }/{ repository name }`.
+  - harbor_username: The username for Harbor.  Required to use Harbor.
+  - harbor_token: The token for Harbor.  Required to use Harbor.
+  - harbor_registry: The registry for Harbor. Default: `goharbor.io`.
+- **Amazon Elastic Container Registry (ECR)**:
+  - ecr_image: The name of the image on ECR. Default: `{ repository name }`.
+  - ecr_access_key_id: The access key ID for ECR.  Required to use ECR.
+  - ecr_secret_access_key: The secret access key for ECR.  Required to use ECR.
+  - ecr_region: The region for ECR.  Default: `us-east-1`.
+  - ecr_registry: The URL to use with ECR.  Default:
+    `{ ecr account id }.dkr.ecr.{ region }.amazonaws.com`.
+- **Custom Registry**
+  - custom_registry_image: The name of the image on the custom registry.
+    Default: `{ repository name }`.
+  - custom_registry_username: The username for the custom registry.
+    Required to use a custom registry.
+  - custom_registry_token: The token for the custom registry.  Required to use
+    a custom registry.
+  - custom_registry: The URL to the custom registry.
+
+### Outputs
+
+The following outputs are available:
+- **DockerHub**
+  - dockerhub: `true` if the image was published to DockerHub, `false` otherwise.
+  - dockerhub_image: The name of the image on DockerHub.
+- **GitHub Container Registry (GHCR)**
+  - ghcr: `true` if the image was published to GHCR, `false` otherwise.
+  - ghcr_image: The name of the image on GHCR.
+- **Quay**
+  - quay: `true` if the image was published to Quay, `false` otherwise.
+  - quay_image: The name of the image on Quay.
+- **Harbor**
+  - harbor: `true` if the image was published to Harbor, `false` otherwise.
+  - harbor_image: The name of the image on Harbor.
+- **Amazon Elastic Container Registry (ECR)**
+  - ecr: `true` if the image was published to ECR, `false` otherwise.
+  - ecr_image: The name of the image on ECR.
+  - ecr_image_url: The URL of the image on ECR.
+- **Custom Registry**
+  - custom_registry: `true` if the image was published to a custom registry,
+    `false` otherwise.
+  - custom_image: The name of the image on the custom registry.
+
+## Examples
+
+```yaml
+---
+name: Build an Awesome Image
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches:
+      - "main"
+    tags:
+      - "v*"
+  workflow_dispatch:
+
+permissions: read-all
+
+jobs:
+  publish_image:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
+        with:
+          depth: 0
+          tags: true
+      - name: Build and Publish Image
+        uses: wesley-dean/publish_container@v1
+        with:
+          dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+          ghcr_userame: ${{ secrets.GHCR_USERNAME }}
+          ghcr_token: ${{ secrets.GHCR_TOKEN }}
+```
 
 ## License
 

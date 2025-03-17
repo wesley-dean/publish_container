@@ -3,6 +3,22 @@ name: Publish Image
 description: Build and push Docker images to multiple registries
 
 inputs:
+
+  dockerfile:
+    description: "Path to the Dockerfile to build"
+    required: false
+    default: "Dockerfile"
+
+  context:
+    description: "Path to the build context"
+    required: false
+    default: "."
+
+  platforms:
+    description: "Platforms to build for"
+    required: false
+    default: "linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6"
+
   dockerhub_image:
     description: "Dockerhub image name"
     required: false
@@ -15,6 +31,7 @@ inputs:
   dockerhub_registry:
     description: "DockerHub registry URL"
     required: false
+    default: "registry.hub.docker.com"
 
   ghcr_image:
     description: "GitHub Container Registry image name"
@@ -25,9 +42,11 @@ inputs:
   ghcr_token:
     description: "GitHub Container Registry personal access token (PAT)"
     required: false
+    default: secrets.GITHUB_TOKEN
   ghcr_registry:
     description: "GitHub Container Registry URL"
     required: false
+    default: "ghcr.io"
 
   quay_image:
     description: "Quay image name"
@@ -41,6 +60,7 @@ inputs:
   quay_registry:
     description: "Quay registry URL"
     required: false
+  default: "quay.io"
 
   harbor_image:
     description: "Harbor image name"
@@ -53,6 +73,24 @@ inputs:
     required: false
   harbor_registry:
     description: "Harbor registry URL"
+    required: false
+    default: "goharbor.io"
+
+  ecr_image:
+    description: "ECR image name"
+    required: false
+  ecr_access_key_id:
+    description: "ECR access key ID"
+    required: false
+  ecr_secret_access_key:
+    description: "ECR secret access key"
+    required: false
+  ecr_region:
+    description: "ECR region"
+    required: false
+    default: "us-east-1"
+  ecr_registry:
+    description: "ECR registry URL"
     required: false
 
   custom_image:
@@ -97,6 +135,16 @@ outputs:
     description: "Harbor image name"
     value: ${{ steps.customvars.outputs.harbor_image }}
 
+  ecr:
+    description: "Whether or not to push to ECR"
+    value: ${{ steps.customvars.outputs.ecr }}
+  ecr_image:
+    description: "ECR image name"
+    value: ${{ steps.customvars.outputs.ecr_image }}
+  ecr_image_url:
+    description: "ECR image URL"
+    value: ${{ steps.ecr.outputs.imageUrl }}
+
   custom:
     description: "Whether or not to push to a custom registry"
     value: ${{ steps.customvars.outputs.custom }}
@@ -108,9 +156,6 @@ runs:
   using: "composite"
   publish_image:
     steps:
-      - name: Checkout
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # pin@v3
-
       - name: Set up QEMU
         uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # pin@v2
 
@@ -151,6 +196,22 @@ runs:
               echo "harbor=true"
             else
               echo "harbor=false"
+            fi
+
+            echo -n "ecr="
+            if [ -n "${{ inputs.ecr_access_key_id }}" ] \
+            && [ -n "${{ inputs.ecr_secret_access_key }}" ] \
+            && [ -n "${{ inputs.ecr_region }}" ] ; then
+              echo "ecr=true"
+            else
+              echo "ecr=false"
+            fi
+
+            echo -n "ecr_region="
+            if [ -n "${{ inputs.ecr_region }}" ] ; then
+              echo "${{ inputs.ecr_region }}"
+            else
+              echo "us-east-1"
             fi
 
             echo -n "custom="
@@ -196,6 +257,13 @@ runs:
               echo "${{ inputs.harbor_username }}/${{ github.event.repository.name }}"
             fi
 
+            echo -n "ecr_image="
+            if [ -n "${{ inputs.ecr_image }}" ] ; then
+              echo "${{ inputs.ecr_image }}"
+            else
+              echo "${{ github.event.repository.name }}"
+            fi
+
             echo -n "custom_image="
             if [ -n "${{ inputs.custom_image }}" ] ; then
               echo "${{ inputs.custom_image }}"
@@ -231,6 +299,13 @@ runs:
               echo "goharbor.io"
             fi
 
+            echo -n "ecr_registry="
+            if [ -n "${{ inputs.ecr_registry }}" ] ; then
+              echo "${{ inputs.ecr_registry }}"
+            else
+              echo "$dkr.ecr.${{ inputs.ecr_region }}.amazonaws.com"
+            fi
+
             echo -n "custom_registry="
             if [ -n "${{ inputs.custom_registry }}" ] ; then
               echo "${{ inputs.custom_registry }}"
@@ -244,7 +319,26 @@ runs:
             else
               echo "linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6"
             fi
-          ) >> $GITHUB_OUTPUT
+
+            echo -n "context="
+            if [ -n "${{ inputs.context }}" ] ; then
+              echo "${{ inputs.context }}"
+            else
+              echo "."
+            fi
+
+            echo -n "dockerfile="
+            if [ -n "${{ inputs.dockerfile }}" ] ; then
+              echo "${{ inputs.dockerfile }}"
+            else
+              if [ -n "${{ inputs.context }}" ] ; then
+                echo -n "${{ inputs.context }}"
+              else
+                echo -n "."
+              fi
+              echo "/Dockerfile"
+            fi
+           ) >> $GITHUB_OUTPUT
 
       ## Login to DockerHub, GitHub Packages, Quay, Harbor, and Custom registries
       - name: Login to DockerHub
@@ -279,6 +373,14 @@ runs:
           password: ${{ inputs.harbor_token }}
           registry: ${{ steps.customvars.outputs.harbor_registry }}
 
+      - name: Login to ECR
+        id: ecr
+        uses: jwalton/gh-ecr-login@8f09f5bf7451d6b8e3f458240eb4026f9476a18d # pin@v3.0.1
+        with:
+          access-key-id: ${{ inputs.ecr_access_key_id }}
+          secret-access-key: ${{ inputs.ecr_secret_access_key }}
+          region: ${{ steps.customvars.outputs.ecr_region }}
+
       - name: Login to Custom registry
         uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # pin@v2
         if: ${{ steps.customvars.outputs.custom == 'true' }}
@@ -298,6 +400,7 @@ runs:
             name=${{ steps.customvars.outputs.quay_registry }}/${{ steps.customvars.outputs.quay_image }},enable=${{ steps.customvars.outputs.quay == 'true' }}
             name=${{ steps.customvars.outputs.harbor_registry }}/${{ steps.customvars.outputs.harbor_image }},enable=${{ steps.customvars.outputs.harbor == 'true' }}
             name=${{ steps.customvars.outputs.custom_registry }}/${{ steps.customvars.outputs.custom_image }},enable=${{ steps.customvars.outputs.custom == 'true' }}
+            name=${{ steps.ecr.outputs.account }}.${{ steps.customvars.outputs.ecr_registry }}/${{ steps.customvars.outputs.ecr_image }},enable=${{ steps.customvars.outputs.ecr == 'true' }}
 
           tags: |
             type=raw,value=latest,enable=${{ steps.customvars.outputs.is_release == 'true' }}
@@ -312,14 +415,27 @@ runs:
 
       # Build and push images
       - name: Build and push
-        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # pin@v4
+        uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # pin@v6.15.0
         with:
           push: true
           sbom: true
+          context: ${{ steps.customvars.outputs.context }}
+          file: ${{ steps.customvars.outputs.dockerfile }}
           platforms: ${{ inputs.platforms }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           annotations: ${{ steps.meta.outputs.annotations }}
+
+      - name: Push to ECR
+        uses: jwalton/gh-ecr-push@v2
+        with:
+          access_key_id: ${{ inputs.ecr_access_key_id }}
+          secret_access_key: ${{ inputs.ecr_secret_access_key }}
+          region: ${{ inputs.ecr_region }}
+          repository: ${{ steps.customvars.outputs.ecr_image }}
+          image: ${{ steps.customvars.outputs.ecr_image }}
+          local_image: ${{ steps.customvars.outputs.ecr_image }}
+          is-semver: true
 
       # Update image descriptions (DockerHub, Quay, and Harbor only)
       - name: update DockerHub description
