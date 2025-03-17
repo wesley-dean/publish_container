@@ -3,7 +3,6 @@ name: Publish Image
 description: Build and push Docker images to multiple registries
 
 inputs:
-
   dockerfile:
     description: "Path to the Dockerfile to build"
     required: false
@@ -416,6 +415,7 @@ runs:
       # Build and push images
       - name: Build and push
         uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # pin@v6.15.0
+        id: build-push
         with:
           push: true
           sbom: true
@@ -426,16 +426,54 @@ runs:
           labels: ${{ steps.meta.outputs.labels }}
           annotations: ${{ steps.meta.outputs.annotations }}
 
-      - name: Push to ECR
-        uses: jwalton/gh-ecr-push@v2
+      # Generate SBOM attestation for DockerHub, GHCR, Quay, Harbor, ECR, and custom registries
+      - name: Generate SBOM attestation for DockerHub
+        uses: actions/attest-sbom@v1
+        if: ${{ steps.customvars.outputs.dockerhub == 'true' }}
         with:
-          access_key_id: ${{ inputs.ecr_access_key_id }}
-          secret_access_key: ${{ inputs.ecr_secret_access_key }}
-          region: ${{ inputs.ecr_region }}
-          repository: ${{ steps.customvars.outputs.ecr_image }}
-          image: ${{ steps.customvars.outputs.ecr_image }}
-          local_image: ${{ steps.customvars.outputs.ecr_image }}
-          is-semver: true
+          subject-name: ${{ steps.customvars.outputs.docker_registry }}/${{ steps.customvars.outputs.dockerhub_image }}
+          subject-digest: "sha256:${{ steps.build-push.outputs.digest }}"
+          push-to-registry: true
+
+      - name: Generate SBOM attestation for GHCR
+        uses: actions/attest-sbom@v1
+        if: ${{ steps.customvars.outputs.ghcr == 'true' }}
+        with:
+          subject-name: ${{ steps.customvars.outputs.ghcr_registry }}/${{ steps.customvars.outputs.ghcr_image }}
+          subject-digest: "sha256:${{ steps.build-push.outputs.digest }}"
+          push-to-registry: true
+
+      - name: Generate SBOM attestation for Quay
+        uses: actions/attest-sbom@v1
+        if: ${{ steps.customvars.outputs.quay == 'true' }}
+        with:
+          subject-name: ${{ steps.customvars.outputs.quay_registry }}/${{ steps.customvars.outputs.quay_image }}
+          subject-digest: "sha256:${{ steps.build-push.outputs.digest }}"
+          push-to-registry: true
+
+      - name: Generate SBOM attestation for Harbor
+        uses: actions/attest-sbom@v1
+        if: ${{ steps.customvars.outputs.harbor== 'true' }}
+        with:
+          subject-name: ${{ steps.customvars.outputs.harbor_registry }}/${{ steps.customvars.outputs.harbor_image }}
+          subject-digest: "sha256:${{ steps.build-push.outputs.digest }}"
+          push-to-registry: true
+
+      - name: Generate SBOM attestation for ECR
+        uses: actions/attest-sbom@v1
+        if: ${{ steps.customvars.outputs.ecr == 'true' }}
+        with:
+          subject-name: ${{ steps.customvars.outputs.ecr_registry }}/${{ steps.customvars.outputs.ecr_image }}
+          subject-digest: "sha256:${{ steps.build-push.outputs.digest }}"
+          push-to-registry: true
+
+      - name: Generate SBOM attestation for custom registries
+        uses: actions/attest-sbom@v1
+        if: ${{ steps.customvars.outputs.custom == 'true' }}
+        with:
+          subject-name: ${{ steps.customvars.outputs.custom_registry }}/${{ steps.customvars.outputs.custom_image }}
+          subject-digest: "sha256:${{ steps.build-push.outputs.digest }}"
+          push-to-registry: true
 
       # Update image descriptions (DockerHub, Quay, and Harbor only)
       - name: update DockerHub description
