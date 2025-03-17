@@ -53,12 +53,11 @@ The action adds various tags to the image, including the following:
   - `edge`
   - `{short sha}`: (short SHA hash of the commit)
   - `{long sha}` (long SHA hash of the commit)
-
 - when the action is triggered by a push to a branch
-- `latest`
-- `{major}.{minor}.{patch}`
-- `{major}.{minor}`
-- `{major}`
+  - `latest`
+  - `{major}.{minor}.{patch}`
+  - `{major}.{minor}`
+  - `{major}`
 
 ## Usage
 
