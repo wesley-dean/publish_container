@@ -1,5 +1,9 @@
 # Publish Image to Various Registries
 
+[![Dependabot Updates](https://github.com/wesley-dean/publish_container/actions/workflows/dependabot/dependabot-updates/badge.svg)](https://github.com/wesley-dean/publish_container/actions/workflows/dependabot/dependabot-updates)
+[![MegaLinter](https://github.com/wesley-dean/publish_container/actions/workflows/megalinter.yml/badge.svg)](https://github.com/wesley-dean/publish_container/actions/workflows/megalinter.yml)
+[![Scorecard supply-chain security](https://github.com/wesley-dean/publish_container/actions/workflows/scorecard.yml/badge.svg)](https://github.com/wesley-dean/publish_container/actions/workflows/scorecard.yml)
+
 ## Description
 
 This project is a GitHub Action that builds a Docker-compatible image on
