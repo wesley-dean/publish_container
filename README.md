@@ -224,7 +224,7 @@ This is a minimal example that builds an image and publishes it to DockerHub.
 
 The action is triggered by a push to the `main` branch or a tag that starts with
 `v` and a version number with a major release level greater than 0 (i.e., it
-would run for `v1.0.0`, but not for `v0.1.0`).  The action can also triggered
+would run for `v1.0.0`, but not for `v0.1.0`).  The action can also be triggered
 manually.
 
 ```yaml
