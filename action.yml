@@ -154,6 +154,44 @@ outputs:
 runs:
   using: "composite"
   publish_image:
+    env:
+      github_ref: ${{ github.ref }}
+      repository_name: ${{ github.event.repository.name }}
+      inputs_platforms: ${{ inputs.platforms }}
+      inputs_context: ${{ inputs.context }}
+      inputs_dockerfile: ${{ inputs.dockerfile }}
+
+      inputs_dockerhub_username: ${{ inputs.dockerhub_username }}
+      inputs_dockerhub_token: ${{ inputs.dockerhub_token }}
+      inputs_dockerhub_image: ${{ inputs.dockerhub_image }}
+      inputs_dockerhub_registry: ${{ inputs.dockerhub_registry }}
+
+      inputs_ghcr_username: ${{ inputs.ghcr_username }}
+      inputs_ghcr_token: ${{ inputs.ghcr_token }}
+      inputs_ghcr_image: ${{ inputs.ghcr_image }}
+      inputs_ghcr_registry: ${{ inputs.ghcr_registry }}
+
+      inputs_quay_username: ${{ inputs.quay_username }}
+      inputs_quay_token: ${{ inputs.quay_token }}
+      inputs_quay_image: ${{ inputs.quay_image }}
+      inputs_quay_registry: ${{ inputs.quay_registry }}
+
+      inputs_harbor_username: ${{ inputs.harbor_username }}
+      inputs_harbor_token: ${{ inputs.harbor_token }}
+      inputs_harbor_image: ${{ inputs.harbor_image }}
+      inputs_harbor_registry: ${{ inputs.harbor_registry }}
+
+      inputs_ecr_access_key_id: ${{ inputs.ecr_access_key_id }}
+      inputs_ecr_secret_access_key: ${{ inputs.ecr_secret_access_key }}
+      inputs_ecr_region: ${{ inputs.ecr_region }}
+      inputs_ecr_image: ${{ inputs.ecr_image }}
+      inputs_ecr_registry: ${{ inputs.ecr_registry }}
+
+      inputs_custom_username: ${{ inputs.custom_username }}
+      inputs_custom_token: ${{ inputs.custom_token }}
+      inputs_custom_image: ${{ inputs.custom_image }}
+      inputs_custom_registry: ${{ inputs.custom_registry }}
+
     steps:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # pin@v2
@@ -165,228 +203,172 @@ runs:
         id: customvars
         shell: bash
         run: |
-          ( echo -n "dockerhub="
-            if [ -n "${{ inputs.dockerhub_username }}" ] \
-            && [ -n "${{ inputs.dockerhub_token }}" ] ; then
+          (
+            platforms="${inputs_platforms}"
+            context="${inputs.context}"
+            dockerfile="${inputs_dockerfile}"
+
+            dockerhub_username="${inputs_dockerhub_username}"
+            dockerhub_token="${inputs_dockerhub_token}"
+            dockerhub_image="${inputs_dockerhub_image}"
+            dockerhub_registry="${inputs_dockerhub_registry}"
+
+            ghcr_username="${inputs_ghcr_username}"
+            ghcr_token="${inputs_ghcr_token}"
+            ghcr_image="${inputs_ghcr_image}"
+            ghcr_registry="${inputs_ghcr_registry}"
+
+            quay_username="${inputs_quay_username}"
+            quay_token="${inputs_quay_token}"
+            quay_image="${inputs_quay_image}"
+            quay_registry="${inputs_quay_registry}"
+
+            harbor_username="${inputs_harbor_username}"
+            harbor_token="${inputs_harbor_token}"
+            harbor_image="${inputs_harbor_image}"
+            harbor_registry="${inputs_harbor_registry}"
+
+            ecr_access_key_id="${inputs_ecr_access_key_id}"
+            ecr_secret_access_key="${inputs_ecr_secret_access_key}"
+            ecr_region="${inputs_ecr_region}"
+            ecr_image="${inputs_ecr_image}"
+            ecr_registry="${inputs_ecr_registry}"
+
+            custom_username="${inputs_custom_username}"
+            custom_token="${inputs_custom_token}"
+            custom_image="${inputs_custom_image}"
+            custom_registry="${inputs_custom_registry}"
+
+            echo -n "is_release="
+            if [[ "${github_ref}" =~ refs/tags/v[1-9].* ]] ; then
               echo "true"
             else
               echo "false"
             fi
+
+            echo -n "platforms=${platforms:-linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6}"
+            echo -n "context=${context:-.}
+            echo -n "dockerfile=${dockerfile:-${context}/Dockerfile}"
+
+            echo -n "dockerhub="
+            if [ -n "${dockerhub_username}" ] \
+            && [ -n "${dockerhub_token}" ] ; then
+              echo "true"
+            else
+              echo "false"
+            fi
+
+            echo -n "dockerhub_image=${dockerhub_image:-${dockerhub_username}/${repository_name}}"
+            echo -n "dockerhub_registry=${dockerhub_registry:-registry.hub.docker.com}"
 
             echo -n "ghcr="
-            if [ -n "${{ inputs.ghcr_username }}" ] \
-            && [ -n "${{ inputs.ghcr_token }}" ] ; then
+            if [ -n "${inputs_ghcr_username}" ] \
+            && [ -n "${inputs_ghcr_token}" ] ; then
               echo "true"
             else
               echo "false"
             fi
 
+            echo -n "ghcr_image=${ghcr_image:-${ghcr_username}/${repository_name}}"
+            echo -n "ghcr_registry=${ghcr_registry:-ghcr.io}"
+
             echo -n "quay="
-            if [ -n "${{ inputs.quay_username }}" ] \
-            && [ -n "${{ inputs.quay_token }}" ] ; then
+            if [ -n "${inputs_quay_username}" ] \
+            && [ -n "${inputs_quay_token}" ] ; then
               echo "quay=true"
             else
               echo "quay=false"
             fi
 
+            echo -n "quay_image=${quay_image:-${quay_username}/${repository_name}}"
+            echo -n "quay_registry=${quay_registry:-quay.io}"
+
+
             echo -n "harbor="
-            if [ -n "${{ inputs.harbor_username }}" ] \
-            && [ -n "${{ inputs.harbor_token }}" ] ; then
+            if [ -n "${inputs_harbor_username}" ] \
+            && [ -n "${inputs_harbor_token}" ] ; then
               echo "harbor=true"
             else
               echo "harbor=false"
             fi
 
+            echo -n "harbor_image=${harbor_image:-${harbor_username}/${repository_name}}"
+            echo -n "harbor_registry=${harbor_registry:-goharbor.io}"
+
             echo -n "ecr="
-            if [ -n "${{ inputs.ecr_access_key_id }}" ] \
-            && [ -n "${{ inputs.ecr_secret_access_key }}" ] \
-            && [ -n "${{ inputs.ecr_region }}" ] ; then
+            if [ -n "${inputs_ecr_access_key_id}" ] \
+            && [ -n "${inputs_ecr_secret_access_key}" ] \
+            && [ -n "${inputs_ecr_region}" ] ; then
               echo "ecr=true"
             else
               echo "ecr=false"
             fi
 
-            echo -n "ecr_region="
-            if [ -n "${{ inputs.ecr_region }}" ] ; then
-              echo "${{ inputs.ecr_region }}"
-            else
-              echo "us-east-1"
-            fi
+            echo -n "ecr_region=${ecr_region:-us-east-1}"
+            echo -n "ecr_image=${ecr_image:-${repository_name}}"
+            echo -n "ecr_registry=${ecr_registry:-dkr.ecr.${ecr_region}.amazonaws.com}"
 
             echo -n "custom="
-            if [ -n "${{ inputs.custom_username }}" ] \
-            && [ -n "${{ inputs.custom_token }}" ] ; then
+            if [ -n "${inputs_custom_username}" ] \
+            && [ -n "${inputs_custom_token}" ] ; then
               echo "custom=true"
             else
               echo "custom=false"
             fi
 
-            echo -n "is_release="
-            if [[ "${{ github.ref }}" =~ refs/tags/v.* ]] ; then
-              echo "true"
-            else
-              echo "false"
-            fi
+            echo -n "custom_image=${custom_image:-${custom_username}/${repository_name}}"
+            echo -n "custom_registry=${custom_registry:-localhost:5000}"
 
-            echo -n "dockerhub_image="
-            if [ -n "${{ inputs.dockerhub_image }}" ] ; then
-              echo "${{ inputs.dockerhub_image }}"
-            else
-              echo "${{ inputs.dockerhub_username }}/${{ github.event.repository.name }}"
-            fi
-
-            echo -n "ghcr_image="
-            if [ -n "${{ inputs.ghcr_image }}" ] ; then
-              echo "${{ inputs.ghcr_image }}"
-            else
-              echo "${{ inputs.ghcr_username }}/${{ github.event.repository.name }}"
-            fi
-
-            echo -n "quay_image="
-            if [ -n "${{ inputs.quay_image }}" ] ; then
-              echo "${{ inputs.quay_image }}"
-            else
-              echo "${{ inputs.quay_username }}/${{ github.event.repository.name }}"
-            fi
-
-            echo -n "harbor_image="
-            if [ -n "${{ inputs.harbor_image }}" ] ; then
-              echo "${{ inputs.harbor_image }}"
-            else
-              echo "${{ inputs.harbor_username }}/${{ github.event.repository.name }}"
-            fi
-
-            echo -n "ecr_image="
-            if [ -n "${{ inputs.ecr_image }}" ] ; then
-              echo "${{ inputs.ecr_image }}"
-            else
-              echo "${{ github.event.repository.name }}"
-            fi
-
-            echo -n "custom_image="
-            if [ -n "${{ inputs.custom_image }}" ] ; then
-              echo "${{ inputs.custom_image }}"
-            else
-              echo "${{ inputs.custom_username }}/${{ github.event.repository.name }}"
-            fi
-
-            echo -n "dockerhub_registry="
-            if [ -n "${{ inputs.dockerhub_registry }}" ] ; then
-              echo "${{ inputs.dockerhub_registry }}"
-            else
-              echo "registry.hub.docker.com"
-            fi
-
-            echo -n "ghcr_registry="
-            if [ -n "${{ inputs.ghcr_registry }}" ] ; then
-              echo "${{ inputs.ghcr_registry }}"
-            else
-              echo "ghcr.io"
-            fi
-
-            echo -n "quay_registry="
-            if [ -n "${{ inputs.quay_registry }}" ] ; then
-              echo "${{ inputs.quay_registry }}"
-            else
-              echo "quay.io"
-            fi
-
-            echo -n "harbor_registry="
-            if [ -n "${{ inputs.harbor_registry }}" ] ; then
-              echo "${{ inputs.harbor_registry }}"
-            else
-              echo "goharbor.io"
-            fi
-
-            echo -n "ecr_registry="
-            if [ -n "${{ inputs.ecr_registry }}" ] ; then
-              echo "${{ inputs.ecr_registry }}"
-            else
-              echo "$dkr.ecr.${{ inputs.ecr_region }}.amazonaws.com"
-            fi
-
-            echo -n "custom_registry="
-            if [ -n "${{ inputs.custom_registry }}" ] ; then
-              echo "${{ inputs.custom_registry }}"
-            else
-              echo "localhost:5000"
-            fi
-
-            echo -n "platforms="
-            if [ -n "${{ inputs.platforms }}" ] ; then
-              echo "${{ inputs.platforms }}"
-            else
-              echo "linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6"
-            fi
-
-            echo -n "context="
-            if [ -n "${{ inputs.context }}" ] ; then
-              echo "${{ inputs.context }}"
-            else
-              echo "."
-            fi
-
-            echo -n "dockerfile="
-            if [ -n "${{ inputs.dockerfile }}" ] ; then
-              echo "${{ inputs.dockerfile }}"
-            else
-              if [ -n "${{ inputs.context }}" ] ; then
-                echo -n "${{ inputs.context }}"
-              else
-                echo -n "."
-              fi
-              echo "/Dockerfile"
-            fi
-           ) >> $GITHUB_OUTPUT
+          ) >> "$GITHUB_OUTPUT"
 
       ## Login to DockerHub, GitHub Packages, Quay, Harbor, and Custom registries
       - name: Login to DockerHub
         uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # pin@v2
         if: ${{ steps.customvars.outputs.dockerhub == 'true' }}
         with:
-          username: ${{ inputs.dockerhub_username }}
-          password: ${{ inputs.dockerhub_token }}
-          registry: ${{ steps.customvars.outputs.dockerhub_registry }}
+          username: "${{ steps.customvars.outputs.dockerhub_username }}"
+          password: "${{ steps.customvars.outputs.dockerhub_token }}"
+          registry: "${{ steps.customvars.outputs.dockerhub_registry }}"
 
       - name: Login to GitHub Packages
         uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # pin@v2
         if: ${{ steps.customvars.outputs.ghcr == 'true' }}
         with:
-          username: ${{ inputs.ghcr_username }}
-          password: ${{ inputs.ghcr_token }}
-          registry: ${{ steps.customvars.outputs.ghcr_registry }}
+          username: "${{ steps.customvars.outputs.ghcr_username }}"
+          password: "${{ steps.customvars.outputs.ghcr_token }}"
+          registry: "${{ steps.customvars.outputs.ghcr_registry }}"
 
       - name: Login to Quay
         uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # pin@v2
         if: ${{ steps.customvars.outputs.quay == 'true' }}
         with:
-          username: ${{ inputs.quay_username }}
-          password: ${{ inputs.quay_token }}
-          registry: ${{ steps.customvars.outputs.quay_registry }}
+          username: "${{ steps.customvars.outputs.quay_username }}"
+          password: "${{ steps.customvars.outputs.quay_token }}"
+          registry: "${{ steps.customvars.outputs.quay_registry }}"
 
       - name: Login to Harbor
         uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # pin@v2
         if: ${{ steps.customvars.outputs.harbor == 'true' }}
         with:
-          username: ${{ inputs.harbor_username }}
-          password: ${{ inputs.harbor_token }}
-          registry: ${{ steps.customvars.outputs.harbor_registry }}
+          username: "${{ steps.customvars.outputs.harbor_username }}"
+          password: "${{ steps.customvars.outputs.harbor_token }}"
+          registry: "${{ steps.customvars.outputs.harbor_registry }}"
 
       - name: Login to ECR
         id: ecr
         uses: jwalton/gh-ecr-login@8f09f5bf7451d6b8e3f458240eb4026f9476a18d # pin@v3.0.1
         with:
-          access-key-id: ${{ inputs.ecr_access_key_id }}
-          secret-access-key: ${{ inputs.ecr_secret_access_key }}
-          region: ${{ steps.customvars.outputs.ecr_region }}
+          access-key-id: "${{ steps.customvars.outputs.ecr_access_key_id }}"
+          secret-access-key: "${{ steps.customvars.outputs.ecr_secret_access_key }}"
+          region: "${{ steps.customvars.outputs.ecr_region }}"
 
       - name: Login to Custom registry
         uses: docker/login-action@9780b0c442fbb1117ed29e0efdff1e18412f7567 # pin@v2
         if: ${{ steps.customvars.outputs.custom == 'true' }}
         with:
-          username: ${{ secrets.custom_username }}
-          password: ${{ secrets.custom_token }}
-          registry: ${{ steps.customvars.outputs.custom_registry }}
+          username: "${{ steps.customvars.outputs.custom_username }}"
+          password: "${{ steps.customvars.outputs.custom_token }}"
+          registry: "${{ steps.customvars.outputs.custom_registry }}"
 
       # Set image metadata and tags
       - name: Docker metadata
@@ -421,7 +403,7 @@ runs:
           sbom: true
           context: ${{ steps.customvars.outputs.context }}
           file: ${{ steps.customvars.outputs.dockerfile }}
-          platforms: ${{ inputs.platforms }}
+          platforms: ${{ steps.customvars.outputs.platforms }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           annotations: ${{ steps.meta.outputs.annotations }}

@@ -11,6 +11,10 @@ various platforms, tags the image, and then publishes a Docker image to various
 registries. The action can be triggered by a push to a branch, a pull request,
 a release, a schedule, or a manual trigger.
 
+### Features
+
+#### Image Labels
+
 The action will add OCI metadata to the image, including the following:
 
 - title
@@ -22,12 +26,18 @@ The action will add OCI metadata to the image, including the following:
 - revision
 - license
 
+#### Image Descriptions
+
 The action will also update the description of the image on DockerHub, Quay,
 and Harbor using the README.md file in the repository.
+
+#### Image Attestations
 
 The action will also generate Software Bill of Materials (SBOM) files in
 CycloneDX format and use them to generate attestations for each image that
 is built.
+
+#### Composite Action Components
 
 The action is a composite action that uses several other actions to build and
 publish images. The action uses the following actions:
@@ -42,6 +52,8 @@ publish images. The action uses the following actions:
 - [actions/attest-sbom](https://github.com/actions/attest-sbom)
 - [christian-korneck/update-container-description-action](https://github.com/christian-korneck/update-container-description-action)
 
+#### Image Platforms
+
 By default, the action builds images for the following platforms:
 
 - linux/amd64
@@ -50,7 +62,12 @@ By default, the action builds images for the following platforms:
 - linux/arm/v7
 
 The action can be configured to build images for other platforms by setting the
-`platforms` input.
+`platforms` input.  The input should be a comma-separated list of platforms.
+
+The `arm` images are built using QEMU emulation so that they can run on
+ARM-based devices such as the Raspberry Pi.
+
+#### Supported Registries
 
 The action can be configured to publish images to the following registries:
 
@@ -70,6 +87,8 @@ The action can be configured to publish images to other registries by setting
 - **Harbor**: `harbor_username` and `harbor_token`
 - **Amazon Elastic Container Registry (ECR)**: `ecr_access_key_id` and `ecr_secret_access_key`
 - **Custom Registry**: `custom_registry_username` and `custom_registry_token`
+
+#### Image Tags
 
 The action adds various tags to the image, including the following:
 
@@ -199,6 +218,15 @@ The following outputs are available:
 
 ## Examples
 
+### Build and Publish Image to DockerHub
+
+This is a minimal example that builds an image and publishes it to DockerHub.
+
+The action is triggered by a push to the `main` branch or a tag that starts with
+`v` and a version number with a major release level greater than 0 (i.e., it
+would run for `v1.0.0`, but not for `v0.1.0`).  The action can also be triggered
+manually.
+
 ```yaml
 ---
 name: Build an Awesome Image
@@ -209,7 +237,7 @@ on:
     branches:
       - "main"
     tags:
-      - "v*"
+      - "v[1-9][0-9]*.*"
   workflow_dispatch:
 
 permissions: read-all
@@ -228,8 +256,47 @@ jobs:
         with:
           dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
           dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
-          ghcr_userame: ${{ secrets.GHCR_USERNAME }}
+```
+
+### Build and Publish Image to DockerHub and GHCR
+
+This example pushes to both DockerHub and GHCR.  The image is given different
+names on each registry.
+
+```yaml
+---
+name: Build an Awesome Image
+
+# yamllint disable-line rule:truthy
+on:
+  push:
+    branches:
+      - "main"
+    tags:
+      - "v[1-9][0-9]*.*"
+  workflow_dispatch:
+
+permissions: read-all
+
+jobs:
+  publish_image:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4.2.2
+        with:
+          depth: 0
+          tags: true
+      - name: Build and Publish Image
+        uses: wesley-dean/publish_container@v1
+        with:
+          dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+          dockerhub_image: "myname/awesomeimage"
+
+          ghcr_username: ${{ secrets.GHCR_USERNAME }}
           ghcr_token: ${{ secrets.GHCR_TOKEN }}
+          ghcr_image: "my-name/awesome-image"
 ```
 
 ## License
