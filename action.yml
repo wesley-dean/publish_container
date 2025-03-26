@@ -161,44 +161,6 @@ outputs:
 
 runs:
   using: "composite"
-  env:
-    inputs_github_ref: ${{ inputs.github_ref }}
-    inputs_repository_name: ${{ inputs.repository_name }}
-    inputs_platforms: ${{ inputs.platforms }}
-    inputs_context: ${{ inputs.context }}
-    inputs_dockerfile: ${{ inputs.dockerfile }}
-
-    inputs_dockerhub_username: ${{ inputs.dockerhub_username }}
-    inputs_dockerhub_token: ${{ inputs.dockerhub_token }}
-    inputs_dockerhub_image: ${{ inputs.dockerhub_image }}
-    inputs_dockerhub_registry: ${{ inputs.dockerhub_registry }}
-
-    inputs_ghcr_username: ${{ inputs.ghcr_username }}
-    inputs_ghcr_token: ${{ inputs.ghcr_token }}
-    inputs_ghcr_image: ${{ inputs.ghcr_image }}
-    inputs_ghcr_registry: ${{ inputs.ghcr_registry }}
-
-    inputs_quay_username: ${{ inputs.quay_username }}
-    inputs_quay_token: ${{ inputs.quay_token }}
-    inputs_quay_image: ${{ inputs.quay_image }}
-    inputs_quay_registry: ${{ inputs.quay_registry }}
-
-    inputs_harbor_username: ${{ inputs.harbor_username }}
-    inputs_harbor_token: ${{ inputs.harbor_token }}
-    inputs_harbor_image: ${{ inputs.harbor_image }}
-    inputs_harbor_registry: ${{ inputs.harbor_registry }}
-
-    inputs_ecr_access_key_id: ${{ inputs.ecr_access_key_id }}
-    inputs_ecr_secret_access_key: ${{ inputs.ecr_secret_access_key }}
-    inputs_ecr_region: ${{ inputs.ecr_region }}
-    inputs_ecr_image: ${{ inputs.ecr_image }}
-    inputs_ecr_registry: ${{ inputs.ecr_registry }}
-
-    inputs_custom_username: ${{ inputs.custom_username }}
-    inputs_custom_token: ${{ inputs.custom_token }}
-    inputs_custom_image: ${{ inputs.custom_image }}
-    inputs_custom_registry: ${{ inputs.custom_registry }}
-
   steps:
     - name: Set up QEMU
       uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # pin@v2
@@ -209,6 +171,44 @@ runs:
     - name: Custom Variables
       id: customvars
       shell: bash
+      env:
+        inputs_github_ref: ${{ inputs.github_ref }}
+        inputs_repository_name: ${{ inputs.repository_name }}
+        inputs_platforms: ${{ inputs.platforms }}
+        inputs_context: ${{ inputs.context }}
+        inputs_dockerfile: ${{ inputs.dockerfile }}
+
+        inputs_dockerhub_username: ${{ inputs.dockerhub_username }}
+        inputs_dockerhub_token: ${{ inputs.dockerhub_token }}
+        inputs_dockerhub_image: ${{ inputs.dockerhub_image }}
+        inputs_dockerhub_registry: ${{ inputs.dockerhub_registry }}
+
+        inputs_ghcr_username: ${{ inputs.ghcr_username }}
+        inputs_ghcr_token: ${{ inputs.ghcr_token }}
+        inputs_ghcr_image: ${{ inputs.ghcr_image }}
+        inputs_ghcr_registry: ${{ inputs.ghcr_registry }}
+
+        inputs_quay_username: ${{ inputs.quay_username }}
+        inputs_quay_token: ${{ inputs.quay_token }}
+        inputs_quay_image: ${{ inputs.quay_image }}
+        inputs_quay_registry: ${{ inputs.quay_registry }}
+
+        inputs_harbor_username: ${{ inputs.harbor_username }}
+        inputs_harbor_token: ${{ inputs.harbor_token }}
+        inputs_harbor_image: ${{ inputs.harbor_image }}
+        inputs_harbor_registry: ${{ inputs.harbor_registry }}
+
+        inputs_ecr_access_key_id: ${{ inputs.ecr_access_key_id }}
+        inputs_ecr_secret_access_key: ${{ inputs.ecr_secret_access_key }}
+        inputs_ecr_region: ${{ inputs.ecr_region }}
+        inputs_ecr_image: ${{ inputs.ecr_image }}
+        inputs_ecr_registry: ${{ inputs.ecr_registry }}
+
+        inputs_custom_username: ${{ inputs.custom_username }}
+        inputs_custom_token: ${{ inputs.custom_token }}
+        inputs_custom_image: ${{ inputs.custom_image }}
+        inputs_custom_registry: ${{ inputs.custom_registry }}
+
       run: |
         (
           github_ref="${inputs_github_ref}"
