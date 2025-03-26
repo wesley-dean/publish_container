@@ -257,7 +257,7 @@ runs:
           fi
 
           echo "platforms=${platforms:-linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6}"
-          echo "context=${context:-.}
+          echo "context=${context:-.}"
           echo "dockerfile=${dockerfile:-${context}/Dockerfile}"
 
           echo -n "dockerhub="
