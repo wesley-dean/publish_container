@@ -163,7 +163,7 @@ runs:
   using: "composite"
   env:
     inputs_github_ref: ${{ inputs.github_ref }}
-    inputs_repository_name: ${{ inputs.repository.name }}
+    inputs_repository_name: ${{ inputs.repository_name }}
     inputs_platforms: ${{ inputs.platforms }}
     inputs_context: ${{ inputs.context }}
     inputs_dockerfile: ${{ inputs.dockerfile }}
