@@ -3,6 +3,14 @@ name: Publish Image
 description: Build and push Docker images to multiple registries
 
 inputs:
+  github_ref:
+    description: "GitHub ref"
+    required: true
+
+  repository_name:
+    description: "Repository name"
+    required: true
+
   dockerfile:
     description: "Path to the Dockerfile to build"
     required: false
@@ -153,10 +161,9 @@ outputs:
 
 runs:
   using: "composite"
-
   env:
-    github_ref: ${{ github.ref }}
-    repository_name: ${{ github.event.repository.name }}
+    inputs_github_ref: ${{ inputs.github_ref }}
+    inputs_repository_name: ${{ inputs.repository_name }}
     inputs_platforms: ${{ inputs.platforms }}
     inputs_context: ${{ inputs.context }}
     inputs_dockerfile: ${{ inputs.dockerfile }}
@@ -204,6 +211,9 @@ runs:
       shell: bash
       run: |
         (
+          github_ref="${inputs_github_ref}"
+          repository_name="${inputs_repository_name}"
+
           platforms="${inputs_platforms}"
           context="${inputs.context}"
           dockerfile="${inputs_dockerfile}"
@@ -246,9 +256,9 @@ runs:
             echo "false"
           fi
 
-          echo -n "platforms=${platforms:-linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6}"
-          echo -n "context=${context:-.}
-          echo -n "dockerfile=${dockerfile:-${context}/Dockerfile}"
+          echo "platforms=${platforms:-linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6}"
+          echo "context=${context:-.}"
+          echo "dockerfile=${dockerfile:-${context}/Dockerfile}"
 
           echo -n "dockerhub="
           if [ -n "${dockerhub_username}" ] \
