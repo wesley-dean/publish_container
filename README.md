@@ -34,7 +34,7 @@ and Harbor using the README.md file in the repository.
 #### Image Attestations
 
 The action will also generate Software Bill of Materials (SBOM) files in
-CycloneDX format and use them to generate attestations for each image that
+SPDX format and use them to generate attestations for each image that
 is built.
 
 #### Composite Action Components
@@ -140,9 +140,10 @@ To use the action, add the following to your GitHub Actions workflow:
       custom_registry: 'registry.example.com'
 ```
 
-All of the inputs are optional.  That said, if none of the inputs are set, the
-action will build the image and tag it, but it will not publish the image.
-It'll just eat your billing minutes.  I recommend against that.
+All of the registry-specific inputs are optional.  That said, if none of the
+registry inputs are set, the action will build the image and tag it, but it
+will not publish the image.  It'll just eat your billing minutes.  I
+recommend against that.
 
 ### Inputs
 
@@ -152,6 +153,10 @@ The following inputs are available:
   - context: The build context for the Docker build. Default: `.`.
   - dockerfile: The path to the Dockerfile. Default: `Dockerfile`.
   - platforms: The platforms to build images for. Default: `linux/amd64,linux/arm64,linux/arm/v6,linux/arm/v7`.
+  - repository_name: The name of the repository.  Consider using
+    `${{ github.repository }}` to get the repository name.  **REUQIRED**
+  - github_ref: The GitHub ref that triggered the action.  Consider using
+    `${{ github.ref }}` to get the ref that triggered the action. **REQUIRED**
 - **DockerHub**
   - dockerhub_image: The name of the image on DockerHub. Default:
     `{ dockerhub username }/{ repository name }`.
@@ -256,6 +261,8 @@ jobs:
         with:
           dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
           dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+          github_ref: ${{ github.ref }}
+          repository_name: ${{ github.repository }}
 ```
 
 ### Build and Publish Image to DockerHub and GHCR
@@ -290,6 +297,9 @@ jobs:
       - name: Build and Publish Image
         uses: wesley-dean/publish_container@v1
         with:
+          github_ref: ${{ github.ref }}
+          repository_name: ${{ github.repository }}
+
           dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
           dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
           dockerhub_image: "myname/awesomeimage"
