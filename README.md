@@ -154,7 +154,7 @@ The following inputs are available:
   - dockerfile: The path to the Dockerfile. Default: `Dockerfile`.
   - platforms: The platforms to build images for. Default: `linux/amd64,linux/arm64,linux/arm/v6,linux/arm/v7`.
   - repository_name: The name of the repository.  Consider using
-    `${{ github.repository }}` to get the repository name.  **REUQIRED**
+    `${{ github.repository }}` to get the repository name.  **REQUIRED**
   - github_ref: The GitHub ref that triggered the action.  Consider using
     `${{ github.ref }}` to get the ref that triggered the action. **REQUIRED**
 - **DockerHub**
