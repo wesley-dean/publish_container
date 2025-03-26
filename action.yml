@@ -269,7 +269,7 @@ runs:
           fi
 
           echo "dockerhub_image=${dockerhub_image:-${dockerhub_username}/${repository_name}}"
-          echo "dockerhub_registry=${dockerhub_registry:-registry.hub.docker.com}"
+          echo "dockerhub_registry=${dockerhub_registry:-docker.io}"
 
           echo -n "ghcr="
           if [ -n "${inputs_ghcr_username}" ] \
