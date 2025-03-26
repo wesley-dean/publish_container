@@ -392,7 +392,7 @@ runs:
       uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # pin@v5
       with:
         images: |
-          name=${{ steps.customvars.outputs.docker_registry }}/${{ steps.customvars.outputs.dockerhub_image }},enable=${{ steps.customvars.outputs.dockerhub == 'true' }}
+          name=${{ steps.customvars.outputs.dockerhub_registry }}/${{ steps.customvars.outputs.dockerhub_image }},enable=${{ steps.customvars.outputs.dockerhub == 'true' }}
           name=${{ steps.customvars.outputs.ghcr_registry }}/${{ steps.customvars.outputs.ghcr_image }},enable=${{ steps.customvars.outputs.ghcr == 'true' }}
           name=${{ steps.customvars.outputs.quay_registry }}/${{ steps.customvars.outputs.quay_image }},enable=${{ steps.customvars.outputs.quay == 'true' }}
           name=${{ steps.customvars.outputs.harbor_registry }}/${{ steps.customvars.outputs.harbor_image }},enable=${{ steps.customvars.outputs.harbor == 'true' }}
