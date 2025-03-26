@@ -215,7 +215,7 @@ runs:
           repository_name="${inputs_repository_name}"
 
           platforms="${inputs_platforms}"
-          context="${inputs.context}"
+          context="${inputs_context}"
           dockerfile="${inputs_dockerfile}"
 
           dockerhub_username="${inputs_dockerhub_username}"
