@@ -529,8 +529,8 @@ runs:
         destination_container_repo: ${{ steps.customvars.outputs.dockerhub_image }}
         provider: dockerhub
       env:
-        DOCKER_USER: ${{ secrets.dockerhub_username }}
-        DOCKER_PASS: ${{ secrets.dockerhub_token }}
+        DOCKER_USER: ${{ steps.customvars.outputs.dockerhub_username }}
+        DOCKER_PASS: ${{ steps.customvars.outputs.dockerhub_token }}
 
     - name: update Quay description
       uses: christian-korneck/update-container-description-action@d36005551adeaba9698d8d67a296bd16fa91f8e8 # pin@v1
@@ -539,7 +539,7 @@ runs:
         destination_container_repo: ${{ steps.customvars.outputs.quay_image }}
         provider: quay
       env:
-        DOCKER_APIKEY: ${{ secrets.quay_token }}
+        DOCKER_APIKEY: ${{ steps.customvars.outputs.quay_token }}
 
     - name: update Harbor description
       uses: christian-korneck/update-container-description-action@d36005551adeaba9698d8d67a296bd16fa91f8e8 # pin@v1
@@ -548,5 +548,5 @@ runs:
         destination_container_repo: ${{ steps.customvars.outputs.harbor_image }}
         provider: harbor2
       env:
-        DOCKER_USER: ${{ secrets.harbor_username }}
-        DOCKER_PASS: ${{ secrets.harbor_token }}
+        DOCKER_USER: ${{ steps.customvars.outputs.harbor_username }}
+        DOCKER_PASS: ${{ steps.customvars.outputs.harbor_token }}
