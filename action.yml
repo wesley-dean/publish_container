@@ -366,6 +366,7 @@ runs:
     - name: Login to ECR
       id: ecr
       uses: jwalton/gh-ecr-login@8f09f5bf7451d6b8e3f458240eb4026f9476a18d # pin@v3.0.1
+      if: ${{ steps.customvars.outputs.ecr == 'true' }}
       with:
         access-key-id: "${{ steps.customvars.outputs.ecr_access_key_id }}"
         secret-access-key: "${{ steps.customvars.outputs.ecr_secret_access_key }}"
