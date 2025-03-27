@@ -60,7 +60,7 @@ representative at an online or offline event.
 
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
 reported to the community leaders responsible for enforcement via an
-[issue](https://github.com/ccsq-cqp/pre-commit-checker/issues).
+[issue](https://github.com/wesley-dean/publish_container/issues/).
 
 All complaints will be reviewed and investigated promptly and fairly.
 
@@ -123,6 +123,6 @@ Community Impact Guidelines were inspired by [Mozilla's code of conduct
 enforcement ladder](https://github.com/mozilla/diversity).
 
 For answers to common questions about this code of conduct, see the
-[FAQ](https://www.contributor-covenant.org/faq).  
+[FAQ](https://www.contributor-covenant.org/faq).
 [Translations](https://www.contributor-covenant.org/translations)
 are also available.
