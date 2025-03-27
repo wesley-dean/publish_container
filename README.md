@@ -176,6 +176,8 @@ The following inputs are available:
     `${{ github.repository }}` to get the repository name.  **REQUIRED**
   - github_ref: The GitHub ref that triggered the action.  Consider using
     `${{ github.ref }}` to get the ref that triggered the action. **REQUIRED**
+  - force_release: If `true`, the action will treat any build as a release and
+    tag the image with the appropriate tags.  Default: `false`.
 - **DockerHub**
   - dockerhub_image: The name of the image on DockerHub. Default:
     `{ dockerhub username }/{ repository name }`.
@@ -384,6 +386,16 @@ can be `my-name/awesome-image`.  This can be done by setting the
 The action uses the `github_ref` to determine the version of the image.  If the
 ref starts with `refs/tags/v[1-9]` (e.g., `v1.0.0`), the action considers this
 run to be a "release" and sets the version to the tag.
+
+#### What about version 0.x.x?
+
+Good eye.  The action won't consider a tag that starts with `v0` to be a
+release.  It will still build and push the image, but it'll only tag the image
+with the `edge` tag plus the short and long hashes.
+
+If, however, the `force_release` input is set to `true`, the action will treat
+any build -- v0.x.x or otherwise -- as a release and tag the image with the
+appropriate tags.
 
 ### What secrets, credentials, tokens, etc. are stored after runs?
 
