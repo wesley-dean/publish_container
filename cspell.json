@@ -8,8 +8,15 @@
     "SSTP",
     "Mikrotik",
     "RouterOS",
+    "anchore",
+    "awesomeimage",
+    "buildx",
+    "dockerhub",
+    "goharbor",
+    "korneck",
     "letsencrypt",
     "privkey",
+    "wesdean",
     "wesleydean"
   ]
 }
