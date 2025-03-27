@@ -11,6 +11,23 @@ various platforms, tags the image, and then publishes a Docker image to various
 registries. The action can be triggered by a push to a branch, a pull request,
 a release, a schedule, or a manual trigger.
 
+The images are tagged with SBOM attestations and OCI metadata.
+
+The goal is to make it easy to build and publish images to various registries
+without a lot of configuration.  When the project started, it was just to
+build for DockerHub with an image name based on the user's DockerHub username
+and the name of the repository.  The project then grew to support the GitHub
+Container Registry (GHCR).  Labels and tags were added, followed by multiple
+platforms (e.g., AMD64 and various ARM platforms that Single-Board Computers
+(SBCs) like Raspberry Pis and such).
+
+The project then grew to support more registries, including Quay, Harbor, ECR,
+and custom registries.
+
+The first use case was to build and publish images that could be used to run
+containers that would run on a laptop, shortly followed by images that could
+run on a Raspberry Pi.
+
 ### Features
 
 #### Image Labels
@@ -113,6 +130,8 @@ To use the action, add the following to your GitHub Actions workflow:
       platforms: 'linux/amd64,linux/arm64,linux/arm/v6,linux/arm/v7'
       dockerfile: 'Dockerfile'
       context: '.'
+      github_ref: ${{ github.ref }}
+      repository_name: ${{ github.repository }}
 
       # to push to DockerHub, use:
       dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
@@ -259,10 +278,13 @@ jobs:
       - name: Build and Publish Image
         uses: wesley-dean/publish_container@v1
         with:
-          dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
-          dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
+          # pass the basic data for the build
           github_ref: ${{ github.ref }}
           repository_name: ${{ github.repository }}
+
+          # just push to DockerHub and nowhere else
+          dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+          dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
 ```
 
 ### Build and Publish Image to DockerHub and GHCR
@@ -297,17 +319,128 @@ jobs:
       - name: Build and Publish Image
         uses: wesley-dean/publish_container@v1
         with:
+
+          # basic inputs
           github_ref: ${{ github.ref }}
           repository_name: ${{ github.repository }}
 
+          # DockerHub inputs
           dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
           dockerhub_token: ${{ secrets.DOCKERHUB_TOKEN }}
           dockerhub_image: "myname/awesomeimage"
 
+          # GHCR inputs
           ghcr_username: ${{ secrets.GHCR_USERNAME }}
           ghcr_token: ${{ secrets.GHCR_TOKEN }}
           ghcr_image: "my-name/awesome-image"
 ```
+
+## Questions
+
+### Why do we need to provide the repo name?
+
+Because the action is a composite action, it doesn't have access to the
+`github.repository` context.  The action needs the repository name to build the
+image name for the various registries.
+
+### Why do we need to provide the ref?
+
+The action needs the ref to determine the version of the image.  The ref is
+used to determine the version of the image.  The ref is also used to determine
+the tags for the image.  Like with the repository name, the action doesn't have
+access to the `github.ref` data.
+
+### What is the context variable?
+
+The context variable is the path to the build context for the Docker build.
+The default is the root of the repository (`.`).
+
+### Why do we need to provide the Dockerfile?
+
+The action needs to know the path to the Dockerfile to build the image.  The
+default is `Dockerfile` in the root of the build context (so, `./Dockerfile`).
+
+### Can we build images for other platforms?
+
+Yes, the action can build images for other platforms.  The `platforms` input
+is a comma-separated list of platforms.  The default is
+`linux/amd64,linux/arm64,linux/arm/v6,linux/arm/v7`.
+
+### Can we publish images to multiple registries?
+
+Yes, images can be pushed to multiple registries.  The action can be configured
+to push images to DockerHub, GHCR, Quay, Harbor, ECR, and custom registries.
+
+### Can images on different registries have different names?
+
+Yes, images on different registries can have different names.  The action
+supports setting the image name for each registry.  For example, the image
+name on DockerHub can be `myname/awesomeimage`, while the image name on GHCR
+can be `my-name/awesome-image`.  This can be done by setting the
+`dockerhub_image` and `ghcr_image` inputs, respectively.
+
+### How are versions handled?
+
+The action uses the `github_ref` to determine the version of the image.  If the
+ref starts with `refs/tags/v[1-9]` (e.g., `v1.0.0`), the action considers this
+run to be a "release" and sets the version to the tag.
+
+### What secrets, credentials, tokens, etc. are stored after runs?
+
+Nothing.  Nothing is stored.  The action uses the credentials to authenticate
+to DockerHub, GHCR, etc. and when updating image descriptions on DockerHub,
+Quay, and Harbor.  The credentials aren't used for anything else.  When they're
+passed to the action as secrets, they're stored in the GitHub Actions
+environment and are not persisted, even in the logs.  It is recommended that
+credentials be stored in GitHub Secrets, not as plain text or repository
+environment variables.
+
+Want to be sure?  Check the code.  It's all there.  Here's a link:
+
+[https://github.com/wesley-dean/publish_container/blob/main/action.yml](https://github.com/wesley-dean/publish_container/blob/main/action.yml)
+
+#### Release tags
+
+Images associated with releases are given the following tags:
+
+- latest
+- edge
+- `{major}.{minor}.{patch}`
+- `{major}.{minor}`
+- `{major}`
+- `{short sha}`
+- `{long sha}`
+
+So, if the tag is `v1.2.3`, the image will be tagged with the following:
+
+- latest
+- edge
+- v1.2.3
+- v1.2
+- v1
+- abc123
+- abc123def456aaa7890123456789abcdef012345
+
+(the SHA hashes are made up)
+
+#### Non-release tags
+
+Images that are not associated with a release are given the following tags:
+
+- edge
+- `{short sha}`
+- `{long sha}`
+
+### Image descriptions
+
+For images on DockerHub, Quay, and Harbor, the action updates the description
+of the image using the README.md file in the repository.
+
+### What if I need to override the image's labels?  Customize build parameters?
+
+Yeah, no, this action just handles the most basic stuff.  If you need to
+customize the build, you'll need to use the underlying actions directly.  If
+you want to provide a PR to include those variables, I'm open to it.
 
 ## License
 
