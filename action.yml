@@ -293,7 +293,7 @@ runs:
 
           echo -n "is_scheduled="
           if [[ "${is_scheduled:-false}" =~ [YyTt].* ]] \
-          && [[ "${force_release:-false}" =~ [YyTt].* ]] ; then
+          && [[ ! "${force_release:-false}" =~ [YyTt].* ]] ; then
             echo "true"
           else
             echo "false"
