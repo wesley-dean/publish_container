@@ -1,6 +1,10 @@
 ---
 name: Publish Image
 description: Build and push Docker images to multiple registries
+author: "Wes Dean"
+branding:
+  icon: package
+  color: blue
 
 inputs:
   github_ref:
