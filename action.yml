@@ -47,7 +47,7 @@ inputs:
   dockerhub_registry:
     description: "DockerHub registry URL"
     required: false
-    default: "registry.hub.docker.com"
+    default: "docker.io"
 
   ghcr_image:
     description: "GitHub Container Registry image name"
