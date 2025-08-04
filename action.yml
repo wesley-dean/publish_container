@@ -402,7 +402,7 @@ runs:
     # Set image metadata and tags
     - name: Docker metadata
       id: meta
-      uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # pin@v5
+      uses: docker/metadata-action@c1e51972afc2121e065aed6d45c65596fe445f3f # pin@v5
       with:
         images: |
           name=${{ steps.customvars.outputs.dockerhub_registry }}/${{ steps.customvars.outputs.dockerhub_image }},enable=${{ steps.customvars.outputs.dockerhub == 'true' }}
