@@ -187,10 +187,10 @@ runs:
   using: "composite"
   steps:
     - name: Set up QEMU
-      uses: docker/setup-qemu-action@29109295f81e9208d7d86ff1c6c12d2833863392 # pin@v2
+      uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # pin@v2
 
     - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@b5ca514318bd6ebac0fb2aedd5d36ec1b5c232a2 # pin@v2
+      uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # pin@v2
 
     - name: Custom Variables
       id: customvars
@@ -384,7 +384,7 @@ runs:
 
       ## Login to DockerHub, GitHub Packages, Quay, Harbor, and Custom registries
     - name: Login to DockerHub
-      uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # pin@v2
+      uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # pin@v2
       if: ${{ steps.customvars.outputs.dockerhub == 'true' }}
       with:
         username: "${{ steps.customvars.outputs.dockerhub_username }}"
@@ -392,7 +392,7 @@ runs:
         registry: "${{ steps.customvars.outputs.dockerhub_registry }}"
 
     - name: Login to GitHub Packages
-      uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # pin@v2
+      uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # pin@v2
       if: ${{ steps.customvars.outputs.ghcr == 'true' }}
       with:
         username: "${{ steps.customvars.outputs.ghcr_username }}"
@@ -400,7 +400,7 @@ runs:
         registry: "${{ steps.customvars.outputs.ghcr_registry }}"
 
     - name: Login to Quay
-      uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # pin@v2
+      uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # pin@v2
       if: ${{ steps.customvars.outputs.quay == 'true' }}
       with:
         username: "${{ steps.customvars.outputs.quay_username }}"
@@ -408,7 +408,7 @@ runs:
         registry: "${{ steps.customvars.outputs.quay_registry }}"
 
     - name: Login to Harbor
-      uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # pin@v2
+      uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # pin@v2
       if: ${{ steps.customvars.outputs.harbor == 'true' }}
       with:
         username: "${{ steps.customvars.outputs.harbor_username }}"
@@ -425,7 +425,7 @@ runs:
         region: "${{ steps.customvars.outputs.ecr_region }}"
 
     - name: Login to Custom registry
-      uses: docker/login-action@74a5d142397b4f367a81961eba4e8cd7edddf772 # pin@v2
+      uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # pin@v2
       if: ${{ steps.customvars.outputs.custom == 'true' }}
       with:
         username: "${{ steps.customvars.outputs.custom_username }}"
@@ -435,7 +435,7 @@ runs:
     # Set image metadata and tags
     - name: Docker metadata
       id: meta
-      uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 # pin@v5
+      uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # pin@v5
       with:
         images: |
           name=${{ steps.customvars.outputs.dockerhub_registry }}/${{ steps.customvars.outputs.dockerhub_image }},enable=${{ steps.customvars.outputs.dockerhub == 'true' }}
@@ -460,7 +460,7 @@ runs:
 
     # Build and push images
     - name: Build and push
-      uses: docker/build-push-action@471d1dc4e07e5cdedd4c2171150001c434f0b7a4 # pin@v6.15.0
+      uses: docker/build-push-action@263435318d21b8e681c14492fe198d362a7d2c83 # pin@v6.18.0
       id: build-push
       with:
         push: true
