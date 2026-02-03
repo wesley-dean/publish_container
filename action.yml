@@ -351,7 +351,7 @@ runs:
 
       ## Login to DockerHub, GitHub Packages, Quay, Harbor, and Custom registries
     - name: Login to DockerHub
-      uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # pin@v2
+      uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # pin@v2
       if: ${{ steps.customvars.outputs.dockerhub == 'true' }}
       with:
         username: "${{ steps.customvars.outputs.dockerhub_username }}"
@@ -359,7 +359,7 @@ runs:
         registry: "${{ steps.customvars.outputs.dockerhub_registry }}"
 
     - name: Login to GitHub Packages
-      uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # pin@v2
+      uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # pin@v2
       if: ${{ steps.customvars.outputs.ghcr == 'true' }}
       with:
         username: "${{ steps.customvars.outputs.ghcr_username }}"
@@ -367,7 +367,7 @@ runs:
         registry: "${{ steps.customvars.outputs.ghcr_registry }}"
 
     - name: Login to Quay
-      uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # pin@v2
+      uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # pin@v2
       if: ${{ steps.customvars.outputs.quay == 'true' }}
       with:
         username: "${{ steps.customvars.outputs.quay_username }}"
@@ -375,7 +375,7 @@ runs:
         registry: "${{ steps.customvars.outputs.quay_registry }}"
 
     - name: Login to Harbor
-      uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # pin@v2
+      uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # pin@v2
       if: ${{ steps.customvars.outputs.harbor == 'true' }}
       with:
         username: "${{ steps.customvars.outputs.harbor_username }}"
@@ -392,7 +392,7 @@ runs:
         region: "${{ steps.customvars.outputs.ecr_region }}"
 
     - name: Login to Custom registry
-      uses: docker/login-action@5e57cd118135c172c3672efd75eb46360885c0ef # pin@v2
+      uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # pin@v2
       if: ${{ steps.customvars.outputs.custom == 'true' }}
       with:
         username: "${{ steps.customvars.outputs.custom_username }}"
