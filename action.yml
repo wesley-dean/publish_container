@@ -417,6 +417,7 @@ runs:
 
     - name: Fetch ECR account
       id: fetchecr
+      shell: bash
       run: |
         (
           ecr_account="${{steps.ecr.outputs.account}}"
